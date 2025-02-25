@@ -1,0 +1,35 @@
+.custom-header {
+    background-color: rgb(135, 94, 146);
+    border-bottom-left-radius: 40px;
+    border-bottom-right-radius: 40px;
+
+}
+
+.header-logo {
+    width: 20%;
+}
+ul {
+    width: 100%;
+}
+.navbar-brand {
+    width: 40%;
+}
+.user-profile .avatar {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+}
+.news-list a {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+body {
+    font-family: 'Merriweather', serif; /* Для основного текста */
+}
+
+h1, h2, h3, .header {
+    font-family: 'Playfair Display', serif; /* Газетный стиль для заголовков */
+    font-weight: 700;
+}
