@@ -6,21 +6,34 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use TCG\Voyager\Models\User as VoyagerUser;
 
-class User extends Authenticatable
+class User extends VoyagerUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+    public function getIsAdminAttribute()
+    {
+        return $this->role_id == 2;
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
+
     public function news()
     {
         return $this->hasMany(News::class);
     }
 
-   // app/Models/User.php
-public function likedNews()
-{
-    return $this->belongsToMany(\App\Models\News::class, 'news_user', 'user_id', 'news_id')->withTimestamps();
-}
+
+
+    public function likedNews()
+    {
+        return $this->belongsToMany(News::class, 'news_likes')->withTimestamps();
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -31,6 +44,7 @@ public function likedNews()
         'name',
         'email',
         'password',
+        'avatar'
     ];
 
     /**
@@ -55,6 +69,4 @@ public function likedNews()
             'password' => 'hashed',
         ];
     }
-
-   
 }

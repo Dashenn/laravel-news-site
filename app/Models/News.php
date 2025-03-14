@@ -20,4 +20,9 @@ class News extends Model
     {
         return $this->belongsToMany(\App\Models\User::class, 'news_user', 'news_id', 'user_id')->withTimestamps();
     }
+
+    public function likedUsers()
+    {
+        return $this->belongsToMany(User::class, 'news_likes')->withTimestamps();
+    }
 }

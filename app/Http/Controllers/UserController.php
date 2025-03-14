@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
+
+use Illuminate\Support\Facades\Storage;
+
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
@@ -17,16 +20,16 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'     => ['required', 'max:255'],
-            'email'    => ['required', 'max:255', 'email', 'unique:users'],
-            'password' => ['required', 'confirmed'],
+            'name'     => ['required', 'max:20', 'unique:users'],
+            'email'    => ['required', 'max:100', 'email', 'unique:users'],
+            'password' => ['required', 'confirmed', 'min:6', 'max:16'],
         ]);
 
         $user = User::create($request->all());
         event(new Registered($user));
         Auth::login($user);
 
-        return redirect()->route('account');
+        return redirect()->route('account')->with('success', 'Вы успешно зарегистрированы');
     }
 
     public function loginAuth(Request $request)
@@ -39,11 +42,11 @@ class UserController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended('account')->with('success', 'Welcome ' . Auth::user()->name . '!');
+            return redirect()->intended('account')->with('success', 'Добро пожаловать ' . Auth::user()->name . '!');
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'Предоставленные учетные данные не соответствуют нашим записям.',
         ]);
     }
 
@@ -86,13 +89,63 @@ class UserController extends Controller
     }
 
     public function likedNews()
-{
-    /** @var \App\Models\User $user */
-    $user = Auth::user();
-    
-    $news = $user->likedNews()->latest()->get();
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
-    return view('user.liked_news', ['news' => $news]);
-}
-}
+        $news = $user->likedNews()->latest()->get();
 
+        return view('user.liked-news', ['news' => $news]);
+    }
+
+
+    public function updateAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:png,jpg|max:2048',
+        ], [
+            'image.mimes' => 'Допустимые форматы: JPG, PNG, GIF.',
+            'image.max' => 'Максимальный размер файла: 2MB.',
+        ]);
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+
+        if ($user->avatar) {
+            Storage::delete('public/avatars/' . $user->avatar);
+        }
+
+
+        $avatarName = time() . '.' . $request->avatar->extension();
+        $request->avatar->storeAs('public/avatars', $avatarName);
+
+
+        $user->avatar = $avatarName;
+        $user->save();
+
+        return redirect()->back()->with('success', 'Аватар успешно обновлен.');
+    }
+
+    public function deleteNews($id)
+    {
+        $user = Auth::user();
+        /** @var \App\Models\User $user */
+        $news = $user->news()->find($id);
+
+        if (!$news) {
+            return redirect()->back()->with('error', 'Пост не найден или у вас нет прав для удаления.');
+        }
+
+        $news->delete();
+
+        return redirect()->route('home',)->with('success', 'Пост удален!');
+    }
+
+    public function profile($id)
+    {
+        $user = User::findOrFail($id);
+        $news = $user->news()->latest()->get();
+
+        return view('user.profile', compact('user', 'news'));
+    }
+}
