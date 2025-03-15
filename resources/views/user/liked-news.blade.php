@@ -42,7 +42,7 @@
                         </div>
                     </div>
                     <footer class="mt-3 text-muted card-footer">
-                        Автор: {{ $item->user->name }}
+                        Автор: <a href="{{ route('user.profile', $item->user->id) }}">{{ $item->user->name }}</a>
                         @if(Auth::check() && Auth::id() === $item->user->id)
                         <form action="{{ route('news.delete', $item->id) }}" method="POST" onsubmit="return confirm('Удалить новость?');" style="margin-top:5px;">
                             @csrf

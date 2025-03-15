@@ -8,7 +8,7 @@
         <div class="col-md-7 new-info px-3">
             <h1 class="title-news">{{ $news->title }}</h1>
             <p class="text-muted">
-                Автор: {{ $news->user->name }},
+                Автор: <a href="{{ route('user.profile', $news->user->id) }}">{{ $news->user->name }}</a>
                 @if($news->created_at)
                 {{ $news->created_at->format('d.m.Y') }}
                 @endif
